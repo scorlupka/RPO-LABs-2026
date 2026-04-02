@@ -9,12 +9,9 @@ func main() {
 	log.Println("Сервер атворизации пдатежей запущен")
 	// TODO: добавить инициализацию БД, маршруты
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/v1", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
 
-	log.Fatal(http.ListenAndServeTLS(":8888",
-		"/etc/ssl/certs/server.crt",
-		"/etc/ssl/private/server.key",
-		nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
