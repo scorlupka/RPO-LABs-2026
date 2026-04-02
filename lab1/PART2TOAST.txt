@@ -1,0 +1,100 @@
+package com.example.fclient;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.view.View;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
+import com.example.fclient.databinding.ActivityMainBinding;
+
+import java.nio.charset.StandardCharsets;
+
+public class MainActivity extends AppCompatActivity {
+
+    // Used to load the 'fclient' library on application startup.
+    static {
+        System.loadLibrary("fclient");
+        System.loadLibrary("mbedcrypto");
+        logForLibraries();
+
+    }
+    public void onButtonClick(View v)
+    {
+        byte[] key = stringToHex("0123456789ABCDEF0123456789ABCDE0");
+        byte[] enc = encrypt(key, stringToHex("000000000000000102"));
+        byte[] dec = decrypt(key, enc);
+        String s = new String(Hex.encodeHex(dec)).toUpperCase();
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
+    public static byte[] stringToHex(String s)
+    {
+        byte[] hex;
+        try
+        {
+            hex = Hex.decodeHex(s.toCharArray());
+        }
+        catch (DecoderException ex)
+        {
+            hex = null;
+        }
+        return hex;
+    }
+
+    private ActivityMainBinding binding;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        /*
+        int res = initRng();
+        byte[] key = randomBytes(16);
+
+
+        byte[] original = "hello pasha".getBytes();
+        byte[] encrypted = encrypt(key, original);
+        byte[] decrypted = decrypt(key, encrypted);
+
+        // Логируем первые 4 байта для примера
+        logForInt(original.length);
+        logForInt(encrypted.length);           // длина зашифрованных данных
+        logForInt(decrypted.length);
+
+        logByteArray(original,   "оригинал");
+        logByteArray(encrypted,  "зашифровано");
+        logByteArray(decrypted,  "расшифровано");
+        Toast.makeText(this,
+                "Расшифровано:\n" + new String(decrypted, StandardCharsets.UTF_8),
+                Toast.LENGTH_LONG).show();
+
+        // Example of a call to a native method
+        TextView tv = binding.sampleText;
+        tv.setText(stringFromJNI());
+         */
+    }
+
+    /**
+     * A native method that is implemented by the 'fclient' native library,
+     * which is packaged with this application.
+     */
+    //нативные функции
+    public native String stringFromJNI(); // получение строки из C++
+    public static native int initRng();   // инициализация генератора случайных чисел
+    public static native byte[] randomBytes(int no); // получение массива случайных байт
+    public static native void logForLibraries(); //лог о том что библиотеки хорошо работают
+    public static native  void logForInt(int num); //лог вывода байта
+    public static native byte[] encrypt(byte[] key, byte[] data); // шифрование
+    public static native byte[] decrypt(byte[] key, byte[] data); // дешифровка
+    public static native void logByteArray(byte[] array, String label);
+
+
+}
+
