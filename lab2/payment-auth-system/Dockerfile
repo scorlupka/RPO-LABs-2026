@@ -1,44 +1,42 @@
-# 1)собираем Go приложения
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
-# Устанавливаем зависимости для SQLite
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc musl-dev git
 
 WORKDIR /app
 
-# копируем go.mod и gu.sum
 COPY go.mod go.sum ./
+
+ENV GOPROXY=direct
+ENV GOSUMDB=off
+
 RUN go mod download
 
-# копируем исходный код
- COPY . .
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-# Собираем приложение 
+COPY . .
+
 RUN go build -o server ./cmd/main.go
 
-# 2)финальный образ
 FROM alpine:latest
 
-# устанавливаем Nginx, SQLite, OpenSSL
-RUN apk --no-cache add nginx sqlite openssl supervisor
+RUN apk --no-cache add nginx openssl supervisor
 
-# Создаём SSL сертификаты для HTTPS
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/server.key \
-    -out /etc/ssl/certs/server.crt \
-    -subj "C=RU/ST=Moscow/L=Moscow/O=PaymentSystem/CN=localhost"
+RUN mkdir -p /app/data /var/log/supervisor /etc/supervisor.d /etc/ssl/private /etc/ssl/certs
 
-# копируем бинарник из этапа сборки
+COPY certs/server.crt /etc/ssl/certs/server.crt
+COPY certs/server.key /etc/ssl/private/server.key
+
+COPY --from=builder /app/server /app/server
+COPY --from=builder /go/bin/goose /app/goose
 COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /app/docs /app/docs
 
-# копируем конфиг Nginx 
 COPY nginx/nginx.conf /etc/nginx/http.d/default.conf
+COPY supervisord.conf /etc/supervisord.conf
 
-# создаем папку для базы данных
- RUN mkdir -p /app/data
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
- #открываем порыт
- EXPOSE 8888
+EXPOSE 8888
 
- # скрипт запуска  (ДОДЕЛАТЬ)
- CMD ["/app/server"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

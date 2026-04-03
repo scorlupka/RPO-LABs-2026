@@ -208,7 +208,7 @@ definitions:
         format: int64
         type: integer
     type: object
-host: localhost:8080
+host: localhost:8888
 info:
   contact: {}
   description: REST API сервера авторизации платежей транспортными картами
@@ -1111,6 +1111,8 @@ paths:
       summary: Обновить пользователя
       tags:
       - users
+schemes:
+- https
 securityDefinitions:
   BearerAuth:
     in: header

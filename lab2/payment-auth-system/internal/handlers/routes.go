@@ -18,7 +18,7 @@ func RegisterRoutes(db *sql.DB) {
 	transactionHandler := NewTransactionHandler(db)
 	terminalAPIHandler := NewTerminalAPIHandler(db)
 
-	http.HandleFunc("/api/v1", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/v1/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
 

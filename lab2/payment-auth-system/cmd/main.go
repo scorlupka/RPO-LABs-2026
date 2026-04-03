@@ -1,8 +1,9 @@
 // @title Payment Auth System API
 // @version 1.0
 // @description REST API сервера авторизации платежей транспортными картами
-// @host localhost:8080
+// @host localhost:8888
 // @BasePath /api/v1
+// @schemes https
 
 // @securityDefinitions.apikey BearerAuth
 // @in header
