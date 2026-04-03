@@ -23,13 +23,7 @@ func main() {
 
 	log.Println("База данных успещно подключена")
 
-	terminalHandler := handler.NewTerminalHandler(db)
-
-	http.HandleFunc("/api/v1", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
-
-	http.HandleFunc("/api/v1/terminals", terminalHandler.GetAll)
+	handler.RegisterRoutes(db)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
