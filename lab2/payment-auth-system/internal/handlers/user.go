@@ -61,7 +61,27 @@ func (h *UserHandler) HandleUserByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetAll godoc
+// @Summary Получить список пользователей
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} UserResponse
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Router /users [get]
 func (h *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	currentUser, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !currentUser.IsAdmin {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
 	rows, err := h.DB.Query(`
 		SELECT id, login, is_admin, created_at
 		FROM users
@@ -95,11 +115,34 @@ func (h *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+// GetByID godoc
+// @Summary Получить пользователя по ID
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {object} UserResponse
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /users/{id} [get]
 func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/users/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	currentUser, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !currentUser.IsAdmin && currentUser.UserID != id {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -128,6 +171,18 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+// Create godoc
+// @Summary Создать пользователя
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateUserRequest true "Create user request"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Router /users [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserRequest
 
@@ -172,11 +227,36 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UpdateByID godoc
+// @Summary Обновить пользователя
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Param request body UpdateUserRequest true "Update user request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /users/{id} [put]
 func (h *UserHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/users/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	currentUser, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !currentUser.IsAdmin && currentUser.UserID != id {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -227,11 +307,34 @@ func (h *UserHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// DeleteByID godoc
+// @Summary Удалить пользователя
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /users/{id} [delete]
 func (h *UserHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/users/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	currentUser, ok := GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if !currentUser.IsAdmin {
+		http.Error(w, "forbidden", http.StatusForbidden)
 		return
 	}
 

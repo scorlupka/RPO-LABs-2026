@@ -58,3 +58,25 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		next(w, r.WithContext(ctx))
 	}
 }
+
+func GetUserFromContext(r *http.Request) (UserClaims, bool) {
+	user, ok := r.Context().Value(UserContextKey).(UserClaims)
+	return user, ok
+}
+
+func AdminOnly(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, ok := GetUserFromContext(r)
+		if !ok {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		if !user.IsAdmin {
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
+		}
+
+		next(w, r)
+	}
+}

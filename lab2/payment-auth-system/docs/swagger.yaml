@@ -1,0 +1,1119 @@
+basePath: /api/v1
+definitions:
+  handlers.AuthorizeTransactionRequest:
+    properties:
+      amount:
+        type: integer
+      card_number:
+        type: string
+      terminal_serial_number:
+        type: string
+    type: object
+  handlers.AuthorizeTransactionResponse:
+    properties:
+      balance_left:
+        type: integer
+      card_id:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+      terminal_id:
+        type: integer
+    type: object
+  handlers.CreateCardRequest:
+    properties:
+      balance:
+        type: integer
+      expire_date:
+        type: string
+      is_blocked:
+        type: boolean
+      key_id:
+        type: integer
+      number:
+        type: string
+      owner_name:
+        type: string
+    type: object
+  handlers.CreateKeyRequest:
+    properties:
+      key_value:
+        type: string
+    type: object
+  handlers.CreateTerminalRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      serial_number:
+        type: string
+      status:
+        type: boolean
+    type: object
+  handlers.CreateTransactionRequest:
+    properties:
+      amount:
+        type: integer
+      card_id:
+        type: integer
+      terminal_id:
+        type: integer
+    type: object
+  handlers.CreateUserRequest:
+    properties:
+      is_admin:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.UpdateCardRequest:
+    properties:
+      balance:
+        type: integer
+      expire_date:
+        type: string
+      is_blocked:
+        type: boolean
+      key_id:
+        type: integer
+      number:
+        type: string
+      owner_name:
+        type: string
+    type: object
+  handlers.UpdateKeyRequest:
+    properties:
+      key_value:
+        type: string
+    type: object
+  handlers.UpdateTerminalRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      serial_number:
+        type: string
+      status:
+        type: boolean
+    type: object
+  handlers.UpdateTransactionRequest:
+    properties:
+      amount:
+        type: integer
+      card_id:
+        type: integer
+      terminal_id:
+        type: integer
+    type: object
+  handlers.UpdateUserRequest:
+    properties:
+      is_admin:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.UserResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_admin:
+        type: boolean
+      login:
+        type: string
+    type: object
+  models.Card:
+    properties:
+      balance:
+        format: int64
+        type: integer
+      createdAt:
+        type: string
+      expireDate:
+        type: string
+      id:
+        format: int64
+        type: integer
+      isBlocked:
+        type: boolean
+      keyID:
+        format: int64
+        type: integer
+      number:
+        type: string
+      ownerName:
+        type: string
+    type: object
+  models.Key:
+    properties:
+      createdAt:
+        type: string
+      id:
+        format: int64
+        type: integer
+      keyValue:
+        type: string
+    type: object
+  models.Terminal:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      id:
+        format: int64
+        type: integer
+      name:
+        type: string
+      serialNumber:
+        type: string
+      status:
+        type: boolean
+    type: object
+  models.Transaction:
+    properties:
+      amount:
+        format: int64
+        type: integer
+      cardID:
+        format: int64
+        type: integer
+      createdAt:
+        type: string
+      id:
+        format: int64
+        type: integer
+      terminalID:
+        format: int64
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API сервера авторизации платежей транспортными картами
+  title: Payment Auth System API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентификация по логину и паролю, возврат JWT
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Вход пользователя
+      tags:
+      - auth
+  /cards:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Card'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список карт
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create card request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать карту
+      tags:
+      - cards
+  /cards/{id}:
+    delete:
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить карту
+      tags:
+      - cards
+    get:
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Card'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить карту по ID
+      tags:
+      - cards
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update card request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить карту
+      tags:
+      - cards
+  /keys:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Key'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список ключей
+      tags:
+      - keys
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create key request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать ключ
+      tags:
+      - keys
+  /keys/{id}:
+    delete:
+      parameters:
+      - description: Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить ключ
+      tags:
+      - keys
+    get:
+      parameters:
+      - description: Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Key'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить ключ по ID
+      tags:
+      - keys
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update key request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateKeyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить ключ
+      tags:
+      - keys
+  /terminal/authorize:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет карту, терминал и баланс, затем создаёт транзакцию
+      parameters:
+      - description: Authorize transaction request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AuthorizeTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthorizeTransactionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.AuthorizeTransactionResponse'
+      summary: Авторизация платежа терминалом
+      tags:
+      - terminal
+  /terminal/keys:
+    get:
+      description: Возвращает все ключи для терминала
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: Получить ключи для терминала
+      tags:
+      - terminal
+  /terminals:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Terminal'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список терминалов
+      tags:
+      - terminals
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create terminal request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTerminalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать терминал
+      tags:
+      - terminals
+  /terminals/{id}:
+    delete:
+      parameters:
+      - description: Terminal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить терминал
+      tags:
+      - terminals
+    get:
+      parameters:
+      - description: Terminal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Terminal'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить терминал по ID
+      tags:
+      - terminals
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Terminal ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update terminal request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateTerminalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить терминал
+      tags:
+      - terminals
+  /transactions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список транзакций
+      tags:
+      - transactions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create transaction request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать транзакцию
+      tags:
+      - transactions
+  /transactions/{id}:
+    delete:
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить транзакцию
+      tags:
+      - transactions
+    get:
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить транзакцию по ID
+      tags:
+      - transactions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update transaction request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить транзакцию
+      tags:
+      - transactions
+  /users:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.UserResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить список пользователей
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Создать пользователя
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Удалить пользователя
+      tags:
+      - users
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Получить пользователя по ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Обновить пользователя
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -50,6 +50,15 @@ func (h *KeyHandler) HandleKeyByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetAll godoc
+// @Summary Получить список ключей
+// @Tags keys
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Key
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Router /keys [get]
 func (h *KeyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.DB.Query(`
 		SELECT id, key_value, created_at
@@ -83,6 +92,18 @@ func (h *KeyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(keys)
 }
 
+// GetByID godoc
+// @Summary Получить ключ по ID
+// @Tags keys
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Key ID"
+// @Success 200 {object} models.Key
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /keys/{id} [get]
 func (h *KeyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/keys/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -115,6 +136,18 @@ func (h *KeyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(key)
 }
 
+// Create godoc
+// @Summary Создать ключ
+// @Tags keys
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateKeyRequest true "Create key request"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Router /keys [post]
 func (h *KeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateKeyRequest
 
@@ -152,6 +185,20 @@ func (h *KeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UpdateByID godoc
+// @Summary Обновить ключ
+// @Tags keys
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Key ID"
+// @Param request body UpdateKeyRequest true "Update key request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /keys/{id} [put]
 func (h *KeyHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/keys/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -200,6 +247,18 @@ func (h *KeyHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// DeleteByID godoc
+// @Summary Удалить ключ
+// @Tags keys
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Key ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 404 {string} string
+// @Router /keys/{id} [delete]
 func (h *KeyHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/keys/")
 	id, err := strconv.ParseInt(idStr, 10, 64)

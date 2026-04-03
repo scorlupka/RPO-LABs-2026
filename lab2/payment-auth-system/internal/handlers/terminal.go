@@ -36,6 +36,14 @@ func (h *TerminalHandler) HandleTerminals(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// GetAll godoc
+// @Summary Получить список терминалов
+// @Tags terminals
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Terminal
+// @Failure 401 {string} string
+// @Router /terminals [get]
 func (h *TerminalHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.DB.Query(`
 		SELECT id, serial_number, address, name, status, created_at
@@ -72,6 +80,17 @@ func (h *TerminalHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(terminals)
 }
 
+// Create godoc
+// @Summary Создать терминал
+// @Tags terminals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateTerminalRequest true "Create terminal request"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Router /terminals [post]
 func (h *TerminalHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateTerminalRequest
 
@@ -112,6 +131,17 @@ func (h *TerminalHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// GetByID godoc
+// @Summary Получить терминал по ID
+// @Tags terminals
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Terminal ID"
+// @Success 200 {object} models.Terminal
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /terminals/{id} [get]
 func (h *TerminalHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/terminals/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -147,6 +177,17 @@ func (h *TerminalHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(terminal)
 }
 
+// DeleteByID godoc
+// @Summary Удалить терминал
+// @Tags terminals
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Terminal ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /terminals/{id} [delete]
 func (h *TerminalHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -206,6 +247,19 @@ type UpdateTerminalRequest struct {
 	Status       bool   `json:"status"`
 }
 
+// UpdateByID godoc
+// @Summary Обновить терминал
+// @Tags terminals
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Terminal ID"
+// @Param request body UpdateTerminalRequest true "Update terminal request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /terminals/{id} [put]
 func (h *TerminalHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

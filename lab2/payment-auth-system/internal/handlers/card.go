@@ -60,6 +60,14 @@ func (h *CardHandler) HandleCardByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetAll godoc
+// @Summary Получить список карт
+// @Tags cards
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Card
+// @Failure 401 {string} string
+// @Router /cards [get]
 func (h *CardHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.DB.Query(`
 		SELECT id, number, balance, is_blocked, owner_name, expire_date, key_id, created_at
@@ -98,6 +106,17 @@ func (h *CardHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(cards)
 }
 
+// GetByID godoc
+// @Summary Получить карту по ID
+// @Tags cards
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Card ID"
+// @Success 200 {object} models.Card
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /cards/{id} [get]
 func (h *CardHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/cards/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -135,6 +154,17 @@ func (h *CardHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(card)
 }
 
+// Create godoc
+// @Summary Создать карту
+// @Tags cards
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateCardRequest true "Create card request"
+// @Success 201 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Router /cards [post]
 func (h *CardHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateCardRequest
 
@@ -177,6 +207,19 @@ func (h *CardHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UpdateByID godoc
+// @Summary Обновить карту
+// @Tags cards
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Card ID"
+// @Param request body UpdateCardRequest true "Update card request"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /cards/{id} [put]
 func (h *CardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/cards/")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -230,6 +273,17 @@ func (h *CardHandler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// DeleteByID godoc
+// @Summary Удалить карту
+// @Tags cards
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Card ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 404 {string} string
+// @Router /cards/{id} [delete]
 func (h *CardHandler) DeleteByID(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/api/v1/cards/")
 	id, err := strconv.ParseInt(idStr, 10, 64)

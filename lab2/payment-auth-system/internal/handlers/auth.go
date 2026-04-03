@@ -36,6 +36,17 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 	return &AuthHandler{DB: db}
 }
 
+// Login godoc
+// @Summary Вход пользователя
+// @Description Аутентификация по логину и паролю, возврат JWT
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Login request"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
